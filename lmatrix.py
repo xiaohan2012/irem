@@ -9,7 +9,7 @@ np.set_printoptions(precision=3, suppress=True)
 class LMatrix(ndarray):
     """Labeled Matrix class"""
 
-    def __new__(cls, rlabels= [], clabels = None, data = None):
+    def __new__(cls, rlabels, clabels = None, data = None):
         """
         rlabels: list of hashable obj, like str, for the rows,
         
@@ -21,9 +21,11 @@ class LMatrix(ndarray):
         
         labels_synonyms: iother names for attr labels
         """
-        if clabels is None:
+
+        #if clabels not presented, then copy rlabels to it
+        if clabels is None: 
             clabels = rlabels
-            
+        
         #if matrix is presented, pass it to the new function
         if data is not None:
             r_cnt,c_cnt = data.shape
@@ -31,85 +33,68 @@ class LMatrix(ndarray):
             #the row count and col count should equal
             if r_cnt != len(rlabels) and c_cnt != len(clabels):
                 raise ValueError("label size and matrix dimension not match ( %dx%d required, %dx%d given)" %(len(rlabels),
-                                                                                                             len(clabels),
-                                                                                                             r_cnt,
-                                                                                                             c_cnt))
+                                                                                                              len(clabels),
+                                                                                                              r_cnt,
+                                                                                                              c_cnt))
             obj = np.asarray(data).view(cls)
         else:
             obj = ndarray.__new__(cls, (len(rlabels), len(clabels)))
 
+            
         obj.rlabels = rlabels
         obj.clabels = clabels
-
+            
         #label to index mapping
-        obj.label2index_mapping = dict((l,i) for i,l in enumerate(obj.labels))
+        obj.rlabel2index_mapping = dict(map(lambda (i,l): (l,i), enumerate(obj.rlabels)))
+        obj.clabel2index_mapping = dict(map(lambda (i,l): (l,i), enumerate(obj.clabels)))
         
-        #label to index mapping
-        obj.index2label_mapping = dict((i,l) for i,l in enumerate(obj.labels))
-
         return obj
     
-    def get_label(self, idx):
-        return self.index2label_mapping.get(idx, "unkown")
-
-        
     def __array_finalize__(self, obj):    
         if obj is None: return
         
-        self.labels = getattr(obj, "labels", None)
-        self.label2index_mapping = getattr(obj, "label2index_mapping", None)
+        self.rlabels = getattr(obj, "rlabels", None)
+        self.clabels = getattr(obj, "clabels", None)
+        
+        self.rlabel2index_mapping = getattr(obj, "rlabel2index_mapping", None)
 
     def __getitem__(self, key):
         if isinstance(key, tuple):
-            s1,s2 = key
-            if not isinstance(s1,int) and not isinstance(s2,int):#s1 and s2 neither int
-                i1 = self.label2index_mapping[s1]
-                i2 = self.label2index_mapping[s2]
-                return self.view(ndarray)[i1,i2]
-            elif not isinstance(s1,int):#s1 is not int
-                i1 = self.label2index_mapping[s1]
-                return self.view(ndarray)[i1,s2]
-            elif not isinstance(s2,int):#s2 is not int
-                i2 = self.label2index_mapping[s2]
-                return self.view(ndarray)[s1,i2]
-
-                
+            ridx, cidx  = key
+            if not self.is_traditional_indexing(ridx) and not self.is_traditional_indexing(cidx):
+                ridx = self.rlabel2index_mapping[ridx]
+                cidx = self.clabel2index_mapping[cidx]
+                return self.view(ndarray)[ridx,cidx]
+            elif not self.is_traditional_indexing(ridx):
+                ridx = self.rlabel2index_mapping[ridx]
+                return self.view(ndarray)[ridx,cidx]
+            elif not self.is_traditional_indexing(cidx):
+                cidx = self.clabel2index_mapping[cidx]
+                return self.view(ndarray)[ridx,cidx]
+               
         return (self.view(ndarray)[key]).view(self.__class__)
-    
+        
+    def is_traditional_indexing(self, idx):
+        """whether use the traditional indexing method, integer or slice of integer"""
+        return isinstance(idx,slice) or isinstance(idx,int)
+        
     def __setitem__(self, key, item):
+        
         if isinstance(key, tuple):
-            s1, s2 = key
-            if not isinstance(s1,int) and not isinstance(s2,int):#s1 and s2 neither int
-                i1 = self.label2index_mapping[s1]
-                i2 = self.label2index_mapping[s2]
-                super(LMatrix, self).__setitem__((i1, i2), item)
+            ridx, cidx  = key
+            if not self.is_traditional_indexing(ridx) and not self.is_traditional_indexing(cidx):
+                ridx = self.rlabel2index_mapping[ridx]
+                cidx = self.clabel2index_mapping[cidx]
+                super(LMatrix, self).__setitem__((ridx, cidx), item)
                 return
-            elif not isinstance(s1,int):#s1 is not int
-                i1 = self.label2index_mapping[s1]
-                super(LMatrix, self).__setitem__((i1, s2), item)
+            elif not self.is_traditional_indexing(ridx):
+                ridx = self.rlabel2index_mapping[ridx]
+                super(LMatrix, self).__setitem__((ridx, cidx), item)
                 return
-            elif not isinstance(s2,int):#s2 is not int
-                i2 = self.label2index_mapping[s2]
-                super(LMatrix, self).__setitem__((s1, i2), item)
+            elif not self.is_traditional_indexing(cidx):
+                cidx = self.clabel2index_mapping[cidx]
+                super(LMatrix, self).__setitem__((ridx, cidx), item)
                 return
         #otherwise
         super(LMatrix, self).__setitem__(key, item)
 
-def main():
-    labels = ["l1", "l2", "l3"]
-    m = LMatrix(labels, labels_synonyms = ["states"])
-
-    m[0,:] = [1,2,3]
-    m["l2",:] = [4,5,6]
-    
-    m["l3","l1"] = 7
-    m[:,"l3"] = [3,6,9]
-    m["l3",:2] = [7,8]
-
-    print m["l1",:]
-    print m[:,'l2']
-    print m
-    print m.labels
-    print m.states
-if __name__ == "__main__":
-    main()
