@@ -28,10 +28,11 @@ class LMatrix(ndarray):
         
         #if matrix is presented, pass it to the new function
         if data is not None:
+
             r_cnt,c_cnt = data.shape
             
             #the row count and col count should equal
-            if r_cnt != len(rlabels) and c_cnt != len(clabels):
+            if r_cnt != len(rlabels) or c_cnt != len(clabels):
                 raise ValueError("label size and matrix dimension not match ( %dx%d required, %dx%d given)" %(len(rlabels),
                                                                                                               len(clabels),
                                                                                                               r_cnt,
