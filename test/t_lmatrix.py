@@ -21,7 +21,7 @@ class IdenticalLabelsTest(unittest.TestCase):
         actual = np.all(self.m["l2",:] == np.array([4, 5, 6]))
         expected = 1
         self.assertEqual(actual, expected)
-        
+    
     def test_eq(self):
         labels = ["l1", "l2", "l3"]
         other = LMatrix(labels, data=np.array([[1,2,3],[4,5,6],[7,8,9]]))
@@ -59,7 +59,13 @@ class UnidenticalLabelsTest(unittest.TestCase):
         actual = self.m["r2", "c2"]
         expected = 5
         self.assertEqual(actual, expected)
-        
+
+class MalformMatrixTest(unittest.TestCase):
+    def test_dimension_unmatch(self):
+        rlabels = ["r1", "r2"]
+        clabels = ["c1", "c2", "c3"]
+        self.assertRaises(ValueError, LMatrix, rlabels, clabels, data = np.array([[1,2,3]]))
+
 if __name__ == '__main__':
     unittest.main()
         
