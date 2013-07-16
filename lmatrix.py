@@ -98,3 +98,12 @@ class LMatrix(ndarray):
         #otherwise
         super(LMatrix, self).__setitem__(key, item)
 
+    def __eq__(self, other):
+        return getattr(self, "rlabels", None) == getattr(other, "rlabels", None) and \
+            getattr(self, "clabels", None) == getattr(other, "clabels", None) and \
+            np.all(self.view(ndarray) == other.view(ndarray)) == 1 
+
+    def __ne__(self, other):
+        return getattr(self, "rlabels", None) != getattr(other, "rlabels", None) or \
+            getattr(self, "clabels", None) != getattr(other, "clabels", None) or \
+            np.all(self.view(ndarray) != other.view(ndarray)) != 1

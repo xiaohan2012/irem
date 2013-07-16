@@ -21,7 +21,17 @@ class IdenticalLabelsTest(unittest.TestCase):
         actual = np.all(self.m["l2",:] == np.array([4, 5, 6]))
         expected = 1
         self.assertEqual(actual, expected)
+        
+    def test_eq(self):
+        labels = ["l1", "l2", "l3"]
+        other = LMatrix(labels, data=np.array([[1,2,3],[4,5,6],[7,8,9]]))
+        self.assertEqual(other, self.m)
 
+    def test_ne(self):
+        labels = ["l1", "l2", "l3"]
+        other = LMatrix(labels, data=np.array([[1,2,3],[4,5,6],[7,8,10]]))
+        self.assertNotEqual(other, self.m)
+        
 class UnidenticalLabelsTest(unittest.TestCase):
     """test for identical labels for row and column"""
     
