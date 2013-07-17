@@ -48,6 +48,10 @@ def backward_prob_table(obs, A, B):
     return sum(ft[:,0] * A[START,:] * B[:, obs[0]]),ft
 
 
+def convergent(old_mat, new_mat):
+    """whether two matrices are approximate enough"""
+    return (np.abs(old_mat - new_mat) / old_mat < 1e-5).all()
+    
 def forward_backward(lst_of_obs, V, Q):
     """
     (
@@ -74,8 +78,13 @@ def forward_backward(lst_of_obs, V, Q):
             obs_prob, bt = backward_prob_table(obs, A, B)
 
             #expect
-            gamma_t = lambda t,j: ft[j,t] * bt[j,t] / obs_prob
-            xi_t = lambda t,i,j: ft[j,t] * A[i,j] * B[j,obs[t+1]] * bt[j,t+1] / obs_prob
+            @memoized
+            def gamma(t,j):
+                return ft[j,t] * bt[j,t] / obs_prob
+                
+            @memoized
+            def xi(t,i,j):
+                return ft[j,t] * A[i,j] * B[j,obs[t+1]] * bt[j,t+1] / obs_prob
 
             #maximization
             new_A = LMatrix(rlabels = V)
@@ -83,13 +92,13 @@ def forward_backward(lst_of_obs, V, Q):
 
             for i in Q:
                 for j in Q:
-                    new_A[r,c] = sum((xi_t(t,i,j) for t in xrange(T - 1))) / \
-                                 sum((xi_t(t,i,j) for t in xrange(T - 1) for j in new_A.rlabels))
+                    new_A[r,c] = sum((xi(t,i,j) for t in xrange(T - 1))) / \
+                                 sum((xi(t,i,j) for t in xrange(T - 1) for j in new_A.rlabels))
 
             for j in Q:
                 for vk in V:
-                    new_B[j,vk] = sum((gamma_t(t,j) for t in xrange(T) if obs[t] == vk)) / \
-                                  sum((gamma_t(t,j) for t in xrange(T)))
+                    new_B[j,vk] = sum((gamma(t,j) for t in xrange(T) if obs[t] == vk)) / \
+                                  sum((gamma(t,j) for t in xrange(T)))
 
             A = new_A
             B = new_B
