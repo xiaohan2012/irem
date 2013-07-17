@@ -1,10 +1,8 @@
-from fb import forward_prob_table, START, END
-
-from lmatrix import LMatrix
-
 from common import *
+from lmatrix import LMatrix
+from fb import backward_prob_table, START, END
 
-class ForwardAlgorithmTest(unittest.TestCase):
+class BackwardAlgorithmTest(unittest.TestCase):
     def setUp(self):
         self.A = LMatrix(rlabels = [START, "H", "C", END],
                          data = np.array([
@@ -26,19 +24,21 @@ class ForwardAlgorithmTest(unittest.TestCase):
 
     def test_result(self):
         """test whether the forward prob table is calculated correctly"""
-        expected = LMatrix(rlabels = [START, "H", "C", END],
+        expected_table = LMatrix(rlabels = [START, "H", "C", END],
                            clabels = range(3),
                            data = np.array([
                                [0, 0, 0],
-                               [0.32, 0.0464, 0.021632],
-                               [0.02, 0.05400, 0.004632],
-                               [0, 0, 0.013132]
+                               [0.0382, 0.155, 0.5],
+                               [0.0452, 0.11, 0.5],
+                               [0, 0, 0]
                            ])
         )
-
-        actual = forward_prob_table(obs = ["3", "1", "3"], A = self.A, B = self.B)
+        expected_prob = 0.013132
         
-        self.assertEqual(expected, actual)
+        actual_prob, actual_table = backward_prob_table(obs = ["3", "1", "3"], A = self.A, B = self.B)
+        
+        self.assertAlmostEqual(expected_prob, actual_prob)
+        self.assertEqual(expected_table, actual_table)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()        
