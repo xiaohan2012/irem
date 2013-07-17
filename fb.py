@@ -2,9 +2,12 @@ import numpy as np
 
 from lmatrix import LMatrix
 
+from util import memoized
+
 START = "START"
 END = "END"
 
+@memoized
 def forward_prob_table(obs, A, B):
     """
     (observations: list of obj,
@@ -31,6 +34,7 @@ def forward_prob_table(obs, A, B):
     
     return ft
 
+@memoized
 def backward_prob_table(obs, A, B):
     states = A.rlabels
     
@@ -52,12 +56,14 @@ def convergent(old_mat, new_mat):
     """whether two matrices are approximate enough"""
     return (np.abs(old_mat - new_mat) / old_mat < 1e-5).all()
     
-def forward_backward(lst_of_obs, V, Q):
+def forward_backward(lst_of_obs, V, Q, init_A, init_B):
     """
     (
-    lst_of_obs: list of list of str, list of observation sequence,
+    lst_of_obs: list of tuple of str, list of observation sequence,
     V: set of str, output vocabulary,
     Q: set of str hidden states set,
+    A: initial transition prob matrix,
+    B: initial emission prob matrix
     ) =>
     (
     A: transition prob matrix
@@ -66,45 +72,49 @@ def forward_backward(lst_of_obs, V, Q):
 
     the backward-forward algorithm
     """
-    #init guess of A and B
-    A = LMatrix(rlabels = V, data = np.random.randn(len(V), len(V)))
-    B = LMatrix(rlabels = V, clabels = Q, data = np.random.ramdn(len(V), len(Q)))
-
+    #observation count
+    m = len(lst_of_obs)
+    
+    #initial A and B
+    A = init_A
+    B = init_B
+    
     while True:
-        for obs in lst_of_obs:
+        #expect
+        @memoized
+        def gamma(k, t, j):
+            """the kth observation, at time t and for the jth hidden state"""
+            obs = lst_of_obs[k]
             T = len(obs) #obs sequence length
-
+            
             ft = forward_prob_table(obs, A, B)
             obs_prob, bt = backward_prob_table(obs, A, B)
-
-            #expect
-            @memoized
-            def gamma(t,j):
-                return ft[j,t] * bt[j,t] / obs_prob
+            return ft[j,t] * bt[j,t] / obs_prob
                 
-            @memoized
-            def xi(t,i,j):
-                return ft[j,t] * A[i,j] * B[j,obs[t+1]] * bt[j,t+1] / obs_prob
-
-            #maximization
-            new_A = LMatrix(rlabels = V)
-            new_B = LMatrix(rlabels = V, clabels = Q)
-
-            for i in Q:
-                for j in Q:
-                    new_A[r,c] = sum((xi(t,i,j) for t in xrange(T - 1))) / \
-                                 sum((xi(t,i,j) for t in xrange(T - 1) for j in new_A.rlabels))
-
-            for j in Q:
-                for vk in V:
-                    new_B[j,vk] = sum((gamma(t,j) for t in xrange(T) if obs[t] == vk)) / \
-                                  sum((gamma(t,j) for t in xrange(T)))
-
-            A = new_A
-            B = new_B
-
-
-        if convergent:
-            break
+        @memoized
+        def xi(k, t, i, j):
+            """the kth observation, at time t and from state i to state j"""
             
-    return A,B
+            obs = lst_of_obs[k]
+            T = len(obs) #obs sequence length
+            
+            ft = forward_prob_table(obs, A, B)
+            obs_prob, bt = backward_prob_table(obs, A, B)
+            return ft[j,t] * A[i,j] * B[j,obs[t+1]] * bt[j,t+1] / obs_prob
+
+        #maximization
+        new_A = LMatrix(rlabels = V)
+        new_B = LMatrix(rlabels = V, clabels = Q)
+
+        for i in Q:
+            for j in Q:
+                new_A[r,c] = sum((xi(t,i,j) for t in xrange(T - 1) for k in xrange(m))) / \
+                             sum((xi(k, t,i,j) for t in xrange(T - 1) for j in Q for k in xrange(m)))
+
+        for j in Q:
+            for vk in V:
+                new_B[j,vk] = sum((gamma(k, t, j) for t in xrange(T) for k in xrange(m) if lst_of_obs[k][t] == vk)) / \
+                              sum((gamma(k, t, j) for t in xrange(T) for k in xrange(m)))
+
+        if convergent(A, new_A) and convergent(B, new_B):
+            return new_A, new_B                
