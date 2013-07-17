@@ -4,6 +4,8 @@ labeled matrix
 import numpy as np
 from numpy import ndarray
 
+from util import almost_eq
+
 np.set_printoptions(precision=3, suppress=True)
 
 class LMatrix(ndarray):
@@ -102,9 +104,9 @@ class LMatrix(ndarray):
     def __eq__(self, other):
         return getattr(self, "rlabels", None) == getattr(other, "rlabels", None) and \
             getattr(self, "clabels", None) == getattr(other, "clabels", None) and \
-            np.all(self.view(ndarray) == other.view(ndarray)) == 1 
+            almost_eq(self.view(ndarray), other.view(ndarray))
 
     def __ne__(self, other):
         return getattr(self, "rlabels", None) != getattr(other, "rlabels", None) or \
             getattr(self, "clabels", None) != getattr(other, "clabels", None) or \
-            np.all(self.view(ndarray) != other.view(ndarray)) != 1
+            not almost_eq(self.view(ndarray), other.view(ndarray))

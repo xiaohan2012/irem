@@ -30,12 +30,12 @@ class ForwardAlgorithmTest(unittest.TestCase):
                            clabels = range(3),
                            data = np.array([
                                [0, 0, 0],
-                               [0.32, 0.0464, 0.0049696],
-                               [0.02, 0.05400, 0.02316],
-                               [0, 0, 0.0140648]
+                               [0.32, 0.0464, 0.021632],
+                               [0.02, 0.05400, 0.004632],
+                               [0, 0, 0.013132]
                            ])
         )
-        
+
         actual = forward_prob_table(obs = ["3", "1", "3"], A = self.A, B = self.B)
         
         self.assertEqual(expected, actual)

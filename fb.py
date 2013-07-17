@@ -18,16 +18,14 @@ def forward_prob_table(obs, A, B):
                  clabels = range(len(obs))) #observations as columns
 
     
-    print states, B.clabels, ft
-    
     for s in states:
         ft[s, 0] = A[START,s] * B[s, obs[0]]
 
     for prev_i, i in zip(range(len(obs) -1 ), range(1, len(obs))):
         ob = obs[i]
         for s in states:
-            print s, ft[:,prev_i], A[:, s], ob, B[s, ob]
             ft[s,i] = sum(ft[:,prev_i] * A[:, s] * B[s, ob])
     
     ft[END, -1] = sum(ft[:, -1] * A[:, END])
+    
     return ft
