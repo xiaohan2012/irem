@@ -35,7 +35,7 @@ class BackwardAlgorithmTest(unittest.TestCase):
         )
         expected_prob = 0.013132
         
-        actual_prob, actual_table = backward_prob_table(obs = ["3", "1", "3"], A = self.A, B = self.B)
+        actual_prob, actual_table = backward_prob_table(("3", "1", "3"), self.A, self.B)
         
         self.assertAlmostEqual(expected_prob, actual_prob)
         self.assertEqual(expected_table, actual_table)

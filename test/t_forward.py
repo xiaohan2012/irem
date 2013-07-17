@@ -36,7 +36,7 @@ class ForwardAlgorithmTest(unittest.TestCase):
                            ])
         )
 
-        actual = forward_prob_table(obs = ["3", "1", "3"], A = self.A, B = self.B)
+        actual = forward_prob_table(("3", "1", "3"), self.A, self.B)
         
         self.assertEqual(expected, actual)
 
