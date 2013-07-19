@@ -49,7 +49,7 @@ class ForwardBackwardAlgorithmTest(unittest.TestCase):
             ("3", "3", "1")
         ]
 
-        self.Q = {START, "H", "C", END}
+        self.Q = {"H", "C"}
         self.V = {"3", "1"}
 
 

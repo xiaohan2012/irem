@@ -1,6 +1,6 @@
 from common import *
 from lmatrix import LMatrix
-from fb import backward_prob_table, START, END
+from fb import backward_prob_table
 
 class BackwardAlgorithmTest(unittest.TestCase):
     def setUp(self):

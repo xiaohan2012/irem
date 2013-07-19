@@ -1,4 +1,4 @@
-from fb import forward_prob_table, START, END
+from fb import forward_prob_table
 
 from lmatrix import LMatrix
 
