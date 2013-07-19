@@ -28,18 +28,20 @@ def forward_prob_table(obs, A, B, pi):
     for s in states:
         #somewhat not easy to read, because pi must be hashable, so the original dict becomes a tuple
         #my question: any hashable dict?
-        print s
-        ft[s, 0] = [i for i in pi if i[0] == s][0][1] 
+        ft[s, 0] = [i for i in pi if i[0] == s][0][1]
 
     for i in xrange(1, len(obs)+1):
         ob = obs[i-1]
         for s in states:
             ft[s,i] = sum(ft[:,i-1] * A[:, s] * B[:, ob])
-    
-    return ft
+
+    return LMatrix(rlabels = states + ["Total"],
+                   clabels = ft.clabels,
+                   data = np.array(ft.tolist() + [ft.sum(0).tolist()])
+               )
 
 @memoized
-def backward_prob_table(obs, A, B):
+def backward_prob_table(obs, A, B, pi):
     states = A.rlabels
     
     #forward prob table

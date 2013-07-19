@@ -24,11 +24,12 @@ class ForwardAlgorithmTest(unittest.TestCase):
 
     def test_result(self):
         """test whether the forward prob table is calculated correctly"""
-        expected = LMatrix(rlabels = ["S1", "S2"],
+        expected = LMatrix(rlabels = ["S1", "S2", "Total"],
                            clabels = range(4),
                            data = np.array([
                                [1, 0.21, 0.0462, 0.021294],
-                               [0.0, 0.09, 0.0378, 0.010206]
+                               [0.0, 0.09, 0.0378, 0.010206],
+                               [1, 0.3, 0.084, 0.0315]
                            ])
         )
 
