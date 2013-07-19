@@ -4,41 +4,37 @@ from fb import backward_prob_table, START, END
 
 class BackwardAlgorithmTest(unittest.TestCase):
     def setUp(self):
-        self.A = LMatrix(rlabels = [START, "H", "C", END],
+        self.pi = (("S1", 1), ("S2", 0.0))
+        
+        self.A = LMatrix(rlabels = ["S1", "S2"],
                          data = np.array([
-                             [0, 0.8, 0.2, 0],
-                             [0, 0.7, 0.3, 0.5],
-                             [0, 0.4, 0.6, 0.5],
-                             [0, 0.0, 0.0, 0]
+                             [0.7, 0.3],
+                             [0.5, 0.5]
                          ]))
         
-        self.B = LMatrix(rlabels = [START, "H", "C", END],
-                         clabels = ["1", "3"],
+        self.B = LMatrix(rlabels = ["S1", "S2"],
+                         clabels = ["K1", "K2", "K3"],
                          data = np.array([
-                             [0, 0],
-                             [0.2, 0.4],
-                             [0.5, 0.1],
-                             [0, 0]
+                             [0.6, 0.1, 0.3],
+                             [0.1, 0.7, 0.2],
                          ])
         )
+    
 
     def test_result(self):
         """test whether the forward prob table is calculated correctly"""
-        expected_table = LMatrix(rlabels = [START, "H", "C", END],
+        expected = LMatrix(rlabels = ["S1", "S2", "Total"],
                            clabels = range(3),
                            data = np.array([
-                               [0, 0, 0],
-                               [0.0382, 0.155, 0.5],
-                               [0.0452, 0.11, 0.5],
-                               [0, 0, 0]
+                               [0.0315, 0.045, 0.6],
+                               [0.029, 0.245, 0.1],
+                               [0.0315, 0.29, 0.7]
                            ])
         )
-        expected_prob = 0.013132
         
-        actual_prob, actual_table = backward_prob_table(("3", "1", "3"), self.A, self.B)
+        actual = backward_prob_table(("K3", "K2", "K1"), self.A, self.B, self.pi)
         
-        self.assertAlmostEqual(expected_prob, actual_prob)
-        self.assertEqual(expected_table, actual_table)
+        self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
     unittest.main()        
