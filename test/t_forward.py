@@ -6,7 +6,7 @@ from common import *
 
 class ForwardAlgorithmTest(unittest.TestCase):
     def setUp(self):
-        self.pi = (("s", 0.85), ("t", 0.16)) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
+        self.pi = hashdict((("s", 0.85), ("t", 0.16))) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
         
         self.A = LMatrix(rlabels = ["s", "t"],
                          data = np.array([
@@ -32,9 +32,10 @@ class ForwardAlgorithmTest(unittest.TestCase):
                            ])
         )
 
-        actual = forward_prob_table(("A", "B", "B", "A"), self.A, self.B, self.pi)
+        actual, obs_prob = forward_prob_table(("A", "B", "B", "A"), self.A, self.B, self.pi)
         
         self.assertEqual(expected, actual)
+        self.assertAlmostEqual(obs_prob, 0.05544, 2)
 
     def test_result_two(self):
         """test whether the forward prob table is calculated correctly, for the second case"""
@@ -46,9 +47,10 @@ class ForwardAlgorithmTest(unittest.TestCase):
                            ])
         )
 
-        actual = forward_prob_table(("B", "A", "B"), self.A, self.B, self.pi)
+        actual, obs_prob = forward_prob_table(("B", "A", "B"), self.A, self.B, self.pi)
         
         self.assertEqual(expected, actual)
+        self.assertAlmostEqual(obs_prob, 0.1399, 2)
         
 class YetAnotherTest(unittest.TestCase):
     pass

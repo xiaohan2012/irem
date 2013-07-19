@@ -4,7 +4,7 @@ from fb import backward_prob_table
 
 class BackwardAlgorithmTest(unittest.TestCase):
     def setUp(self):
-        self.pi = (("s", 0.85), ("t", 0.16)) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
+        self.pi = hashdict([("s", 0.85), ("t",0.16)]) 
         
         self.A = LMatrix(rlabels = ["s", "t"],
                          data = np.array([
@@ -30,10 +30,11 @@ class BackwardAlgorithmTest(unittest.TestCase):
                            ])
         )
 
-        actual = backward_prob_table(("A", "B", "B", "A"), self.A, self.B, self.pi)
+        actual, obs_prob = backward_prob_table(("A", "B", "B", "A"), self.A, self.B, self.pi)
         
         self.assertEqual(expected, actual)
-
+        self.assertAlmostEqual(obs_prob, 0.055451099999999996)
+        
     def test_result_two(self):
         """test whether the backward prob table is calculated correctly, for the second case"""
         expected = LMatrix(rlabels = ["s", "t"],
@@ -44,8 +45,8 @@ class BackwardAlgorithmTest(unittest.TestCase):
                            ])
         )
 
-        actual = backward_prob_table(("B", "A", "B"), self.A, self.B, self.pi)
-        self.assertEqual(expected, actual)
-        
+        actual, obs_prob = backward_prob_table(("B", "A", "B"), self.A, self.B, self.pi)
+        self.assertAlmostEqual(obs_prob, 0.14352700000000002)
+
 if __name__ == '__main__':
     unittest.main()        
