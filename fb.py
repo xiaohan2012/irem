@@ -49,17 +49,20 @@ def backward_prob_table(obs, A, B, pi):
     states = A.rlabels
 
     T = len(obs)
+    
     #forward prob table
+    #ft[s,j] means the prob of observing the `j+1`-to-end's observations and at time `j`, in state `s`
     ft = LMatrix(rlabels = states, #states as row
                  clabels = range(T)) #observations as columns
 
     for s in states:
-        ft[s, -1] = B[s,obs[-1]]
+        ft[s, -1] = 1
 
     for i in range(T - 1)[::-1]:
         for s in states:
-            ft[s,i] = sum(ft[:,i+1] * A[s,:] * B[s,obs[i]])
+            ft[s,i] = sum(A[s,:] * ft[:,i+1] * B[:,obs[i+1]])
 
+    """
     obs_prob = np.zeros(len(ft.clabels))
     obs_prob[1:] = ft[:,1:].sum(0)
     obs_prob[0] = sum(ft[:,0] * np.array([tpl[1] for tpl in pi]))
@@ -68,6 +71,8 @@ def backward_prob_table(obs, A, B, pi):
                    clabels = ft.clabels,
                    data = np.array(ft.tolist() + [obs_prob])
                )
+    """
+    return ft
             
 def convergent(old_mat, new_mat):
     """whether two matrices are approximate enough"""
