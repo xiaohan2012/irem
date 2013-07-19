@@ -19,27 +19,31 @@ def forward_prob_table(obs, A, B, pi):
     forward prob table: LMatrix
     """
     states = A.rlabels
+    T = len(obs)
     
-    #forward prob table
+    #initialize forward prob table
+    #ft[s,j] means the probability of seeing the first `j` observations
+    #and the `j`th state is `s`
     ft = LMatrix(rlabels = states, #states as row
-                 clabels = range(len(obs)+1)) #observations as columns
+                 clabels = range(T)) #observations as columns
 
     
     for s in states:
         #somewhat not easy to read, because pi must be hashable, so the original dict becomes a tuple
         #my question: any hashable dict?
-        ft[s, 0] = [i for i in pi if i[0] == s][0][1]
+        ft[s, 0] = [i for i in pi if i[0] == s][0][1] * B[s,obs[0]]
 
-    for i in xrange(1, len(obs)+1):
-        ob = obs[i-1]
+    for i in xrange(1, T):
         for s in states:
-            ft[s,i] = sum(ft[:,i-1] * A[:, s] * B[:, ob])
-
+            ft[s,i] = sum(ft[:,i-1] * A[:, s] * B[s, obs[i]])
+    """
     return LMatrix(rlabels = states + ["Total"],
                    clabels = ft.clabels,
                    data = np.array(ft.tolist() + [ft.sum(0).tolist()])
                )
-
+    """
+    return ft
+    
 @memoized
 def backward_prob_table(obs, A, B, pi):
     states = A.rlabels
