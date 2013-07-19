@@ -2,6 +2,8 @@ import numpy as np
 
 from util import memoized
 
+from fb import forward_prob_table, backward_prob_table
+
 def convergent(old_mat, new_mat):
     """whether two matrices are approximate enough"""
     return (np.abs(old_mat - new_mat) / old_mat < 1e-5).all()
@@ -9,24 +11,34 @@ def convergent(old_mat, new_mat):
 @memoized    
 def gamma(obs, j, from_state, to_state, A, B, pi):
     """
-    (observation: list of str, time j: int, from state: str, to state: str) => float
+    (observation: list of str, time j: int, from state: str, to state: str, transition matrix: LMatrix, emission matrix: LMatrix, hashdict: init state vector) => float
     
     for observation `obs`, the probability that has `from_state` as its `j`th state and `to_state` as its (`j`+1)th state
     """
-    from fb import forward_prob_table, backward_prob_table
     
     ft, obs_prob1 = forward_prob_table(obs, A, B, pi)
     bt, obs_prob2 = backward_prob_table(obs, A, B, pi)
 
     #ensure obs_prob from both tables are the same
     assert(np.abs(obs_prob1 - obs_prob2) < 1e-5)
-    #print ft[from_state, j] , A[from_state, to_state] , B[to_state, obs[j+1]] , bt[to_state, j+1]
-    #print obs_prob1
+
     return ft[from_state, j] * A[from_state, to_state] * B[to_state, obs[j+1]] * bt[to_state, j+1] / obs_prob1
 
 @memoized
 def delta(obs, j, s, A, B, pi):
-    pass
+    """
+    (observation: list of str, time j: int, from state: str, to state: str, transition matrix: LMatrix, emission matrix: LMatrix, hashdict: init state vector) => float
+    
+    for observation `obs`, the probability that its `j`th state is `s`, given A, B and pi
+    """
+    states = A.rlabels
+    T = len(obs)
+    
+    if j < T - 1: #not the special case
+        return sum( (gamma(obs, j, s, to_state, A, B, pi) for to_state in states) )
+    else:
+        ft, obs_prob = forward_prob_table(obs, A, B, pi)
+        return ft[s, T-1] / obs_prob
     
 def baum_welch(lst_of_obs, V, Q, init_A, init_B):
     """
