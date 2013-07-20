@@ -61,6 +61,7 @@ class LMatrix(ndarray):
         self.clabels = getattr(obj, "clabels", None)
         
         self.rlabel2index_mapping = getattr(obj, "rlabel2index_mapping", None)
+        self.clabel2index_mapping = getattr(obj, "clabel2index_mapping", None)
 
     def __getitem__(self, key):
         if isinstance(key, tuple):
