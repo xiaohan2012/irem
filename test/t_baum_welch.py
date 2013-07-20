@@ -2,28 +2,6 @@ from common import *
 from baum_welch import baum_welch, convergent, gamma, delta, one_iter
 
 
-class ConvergentTest(unittest.TestCase):
-    def test_convergent_case(self):
-        old_v = np.array([
-            1,2,3
-        ])
-        new_v = np.array([
-            1.000009,2,3
-        ])
-        self.assertTrue(convergent(old_v, new_v))
-
-    def test_not_convergent_case(self):
-        old_v = np.array([
-            1.0, 2.0, 3.0
-        ])
-        
-        new_v = np.array([
-            1.00001, 2.0, 3.0
-        ])
-        
-        self.assertFalse(convergent(old_v, new_v))
-
-
 class BaumWelchTest(unittest.TestCase):
     def setUp(self):
         self.pi = hashdict([("s", 0.85), ("t", 0.16)]) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
@@ -136,7 +114,8 @@ class IterationOneTest(unittest.TestCase):
 
     def test_pi(self):
         _, _, pi = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
-        for actual, expected in zip(pi, [0.846, 0.154]):
+        for actual, expected in zip( (pi[s] for s in self.A.rlabels), \
+                                     [0.846, 0.154]):
             self.assertAlmostEqual(actual, expected, places = 2)
 
     def test_A(self):
@@ -175,7 +154,8 @@ class IterationTwoTest(unittest.TestCase):
 
     def test_pi(self):
         _, _, pi = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
-        for actual, expected in zip(pi, [0.841, 0.159]):
+        for actual, expected in zip( (pi[s] for s in self.A.rlabels),\
+                                     [0.841, 0.159]):
             self.assertAlmostEqual(actual, expected, places = 1)
 
     def test_A(self):

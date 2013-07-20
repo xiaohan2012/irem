@@ -6,10 +6,10 @@ from fb import forward_prob_table, backward_prob_table
 
 from lmatrix import LMatrix
 
-def convergent(old_mat, new_mat):
-    """whether two matrices are approximate enough"""
-    #print np.abs(old_mat - new_mat) / old_mat
-    return (np.abs(old_mat - new_mat) / old_mat < 1e-5).all()
+def convergent(old_score, new_score, places = 4):
+    """whether scores are approximate enough"""
+    print np.abs( (old_score - new_score) / old_score)
+    return np.abs((old_score - new_score) / old_score) < 10**(-places)
 
 @memoized    
 def gamma(obs, j, from_state, to_state, A, B, pi):
@@ -56,7 +56,10 @@ def one_iter(lst_of_obs, A, B, pi):
 
     #normalize it
     pi_normalized = pi_unnormalized / np.sum(pi_unnormalized)
-        
+    
+    #to hashdict
+    pi_normalized = hashdict(zip(Q, pi_normalized))
+    
     #get transition prob matrix
     A_unnormalized = LMatrix(rlabels = Q, clabels = Q)
 
@@ -88,8 +91,8 @@ def one_iter(lst_of_obs, A, B, pi):
     
 def baum_welch(lst_of_obs, A, B, pi):
     """
-    (
     lst_of_obs: list of tuple of str, list of observation sequence,
+    (
     A: initial transition prob matrix,
     B: initial emission prob matrix
     pi: initial state vector
@@ -102,13 +105,17 @@ def baum_welch(lst_of_obs, A, B, pi):
 
     the baum-welch algorithm
     """
-    
+    scores = []
+    i = 0
     while True:
+        old_score = sum( (np.log(forward_prob_table(obs, A, B, pi)[1]) for obs in lst_of_obs) )
+        
         new_A,new_B,new_pi = one_iter(lst_of_obs, A, B, pi)
 
-        print new_A, new_B, new_pi
+        new_score = sum( (np.log(forward_prob_table(obs, new_A, new_B, new_pi)[1]) for obs in lst_of_obs) )
         
-        if convergent(A, new_A) and convergent(B, new_B) and convergent(np.array(pi.values()), new_pi):
+        if convergent(old_score, new_score):
             return new_A, new_B, new_pi
 
-        A, B, pi = new_A, new_B, hashdict(zip(A.rlabels,new_pi))#convert pi to dict, dont forget
+        A, B, pi = new_A, new_B, new_pi
+        print A, B
