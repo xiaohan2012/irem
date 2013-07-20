@@ -4,6 +4,8 @@ from util import memoized
 
 from fb import forward_prob_table, backward_prob_table
 
+from lmatrix import LMatrix
+
 def convergent(old_mat, new_mat):
     """whether two matrices are approximate enough"""
     return (np.abs(old_mat - new_mat) / old_mat < 1e-5).all()
@@ -39,6 +41,49 @@ def delta(obs, j, s, A, B, pi):
     else:
         ft, obs_prob = forward_prob_table(obs, A, B, pi)
         return ft[s, T-1] / obs_prob
+
+def one_iter(lst_of_obs, A, B, pi):
+    """
+    given list of observations and the configuratin of HMM(A, B and pi),
+    first expect, then maximize, last return a new HMM
+    """
+    Q = A.rlabels
+    V = B.clabels
+    
+    #get pi
+    pi_unnormalized = np.array(map(lambda s: sum((delta(obs, 0, s, A, B, pi) for obs in lst_of_obs)), Q))
+
+    #normalize it
+    pi_normalized = pi_unnormalized / np.sum(pi_unnormalized)
+        
+    #get transition prob matrix
+    A_unnormalized = LMatrix(rlabels = Q, clabels = Q)
+
+    for obs in lst_of_obs:
+        T = len(obs)
+        for fs in Q:
+            for ts in Q:
+                A_unnormalized[fs, ts] += sum( (gamma(obs, j, fs, ts, A, B, pi) for j in xrange(T-1)) )
+
+    #normalize it
+    rc,cc =  A_unnormalized.shape
+    A_normalized = A_unnormalized / A_unnormalized.sum(1).reshape(rc,1).repeat(cc,1)
+    
+    #get emission prob matrix
+    B_unnormalized = LMatrix(rlabels = Q, clabels = V)
+
+    for obs in lst_of_obs:
+        for j, ob in enumerate(obs):
+            for s in Q:
+                B_unnormalized[s,ob] += delta(obs, j, s, A, B, pi)
+
+    
+    #normalize it
+    rc,cc =  B_unnormalized.shape
+    B_normalized = B_unnormalized / B_unnormalized.sum(1).reshape(rc,1).repeat(cc,1)
+                
+    return A_normalized, B_normalized, pi_normalized
+
     
 def baum_welch(lst_of_obs, V, Q, init_A, init_B):
     """

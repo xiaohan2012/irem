@@ -1,5 +1,5 @@
 from common import *
-from baum_welch import baum_welch, convergent, gamma, delta
+from baum_welch import baum_welch, convergent, gamma, delta, one_iter
 
 
 class ConvergentTest(unittest.TestCase):
@@ -43,9 +43,6 @@ class BaumWelchTest(unittest.TestCase):
         )
 
         self.lst_of_obs = [("A", "B", "B", "A")] * 10 + [("B", "A", "B")] * 20
-
-        self.Q = ["s", "t"]
-        self.V = ["A", "B"]
 
     def test_gamma_case_1(self):
         """test for the gamma function"""
@@ -113,7 +110,41 @@ class BaumWelchTest(unittest.TestCase):
 
         self.assertAlmostEqual(delta( ("B", "A", "B"), 2, "s", self.A, self.B, self.pi), 0.14939, places = 1)
         self.assertAlmostEqual(delta( ("B", "A", "B"), 2, "t", self.A, self.B, self.pi), 0.85061, places = 1)
+
+class IterationOneTest(unittest.TestCase):
+    def setUp(self):
+        self.lst_of_obs = [("A", "B", "B", "A")] * 10 + [("B", "A", "B")] * 20
+        self.pi = hashdict([("s", 0.85), ("t", 0.16)]) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
         
+        self.A = LMatrix(rlabels = ["s", "t"],
+                         data = np.array([
+                             [0.3, 0.7],
+                             [0.1, 0.9]
+                         ]))
         
+        self.B = LMatrix(rlabels = ["s", "t"],
+                         clabels = ["A", "B"],
+                         data = np.array([
+                             [0.4, 0.6],
+                             [0.5, 0.5],
+                         ])
+        )
+
+    def test_pi(self):
+        _, _, pi = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(pi, [0.846, 0.154]):
+            self.assertAlmostEqual(actual, expected, places = 2)
+
+    def test_A(self):
+        A, _, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(A.flatten(), [0.298, 0.702, 0.106, 0.894]):
+            self.assertAlmostEqual(actual, expected, places = 2)
+
+    def test_B(self):
+        _, B, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(B.flatten(), [0.357, 0.643, 0.4292, 0.5708]):
+            self.assertAlmostEqual(actual, expected, places = 2)
+            
+            
 if __name__ == '__main__':
     unittest.main()
