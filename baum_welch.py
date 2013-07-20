@@ -8,7 +8,7 @@ from lmatrix import LMatrix
 
 def convergent(old_score, new_score, places = 4):
     """whether scores are approximate enough"""
-    print np.abs( (old_score - new_score) / old_score)
+    
     return np.abs((old_score - new_score) / old_score) < 10**(-places)
 
 @memoized    
@@ -113,9 +113,8 @@ def baum_welch(lst_of_obs, A, B, pi):
         new_A,new_B,new_pi = one_iter(lst_of_obs, A, B, pi)
 
         new_score = sum( (np.log(forward_prob_table(obs, new_A, new_B, new_pi)[1]) for obs in lst_of_obs) )
-        
+        print "new score", new_score
         if convergent(old_score, new_score):
             return new_A, new_B, new_pi
 
         A, B, pi = new_A, new_B, new_pi
-        print A, B
