@@ -1,6 +1,12 @@
 from common import *
 from lmatrix import LMatrix
 
+class LMatrixTest(unittest.TestCase):
+    def test_no_data_given(self):
+        m = LMatrix(rlabels = ["1", "2", "3"])
+        for i in m.flatten():
+            self.assertEqual(i, 0)
+        
 class IdenticalLabelsTest(unittest.TestCase):
     """test for identical labels for row and column"""
     

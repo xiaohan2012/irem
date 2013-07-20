@@ -41,7 +41,8 @@ class LMatrix(ndarray):
                                                                                                               c_cnt))
             obj = np.asarray(data).view(cls)
         else:
-            obj = ndarray.__new__(cls, (len(rlabels), len(clabels)))
+            rc, cc = len(rlabels), len(clabels)
+            obj = ndarray.__new__(cls, (rc, cc), buffer = np.zeros( (rc,cc) ))
 
             
         obj.rlabels = rlabels
