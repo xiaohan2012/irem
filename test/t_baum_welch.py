@@ -111,6 +111,10 @@ class BaumWelchTest(unittest.TestCase):
         self.assertAlmostEqual(delta( ("B", "A", "B"), 2, "s", self.A, self.B, self.pi), 0.14939, places = 1)
         self.assertAlmostEqual(delta( ("B", "A", "B"), 2, "t", self.A, self.B, self.pi), 0.85061, places = 1)
 
+    def test_baum_welch(self):
+        """test for the baum welch algorithm"""
+        A, B, pi = baum_welch(self.lst_of_obs, self.A, self.B, self.pi)
+        
 class IterationOneTest(unittest.TestCase):
     def setUp(self):
         self.lst_of_obs = [("A", "B", "B", "A")] * 10 + [("B", "A", "B")] * 20
