@@ -145,6 +145,44 @@ class IterationOneTest(unittest.TestCase):
         for actual, expected in zip(B.flatten(), [0.357, 0.643, 0.4292, 0.5708]):
             self.assertAlmostEqual(actual, expected, places = 2)
             
+
+class IterationTwoTest(unittest.TestCase):
+    """
+    Continuing the first iteration, this is the second iteration
+    """
+    
+    def setUp(self):
+        self.lst_of_obs = [("A", "B", "B", "A")] * 10 + [("B", "A", "B")] * 20
+        self.pi = hashdict([("s", 0.846,), ("t", 0.154)]) #two values don't sum to 1, this is because we want to accomondate to the rounding error in Moss's lecture
+        
+        self.A = LMatrix(rlabels = ["s", "t"],
+                         data = np.array([
+                             [0.298, 0.702],
+                             [0.106, 0.894]
+                         ]))
+        
+        self.B = LMatrix(rlabels = ["s", "t"],
+                         clabels = ["A", "B"],
+                         data = np.array([
+                             [0.357, 0.643],
+                             [0.4292, 0.5708],
+                         ])
+        )
+
+    def test_pi(self):
+        _, _, pi = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(pi, [0.841, 0.159]):
+            self.assertAlmostEqual(actual, expected, places = 1)
+
+    def test_A(self):
+        A, _, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(A.flatten(), [0.292, 0.708, 0.109, 0.891]):
+            self.assertAlmostEqual(actual, expected, places = 2)
+
+    def test_B(self):
+        _, B, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        for actual, expected in zip(B.flatten(), [0.3624, 0.6376, 0.4252, 0.5748]):
+            self.assertAlmostEqual(actual, expected, places = 2)
             
 if __name__ == '__main__':
     unittest.main()
