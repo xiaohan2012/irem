@@ -110,7 +110,7 @@ def sample_observations_from_file(f, n=2000):
 
 def get_V(annotation_list, obs_list = []):
     """given the annotation list and the observation list, return the output vocabulary"""
-    return tuple( set( (pair.word for sent in annotation_list for pair in sent) ).union(set( (ob for obs in obs_list for ob in obs) ) ) )
+    return  set( (pair.word for sent in annotation_list for pair in sent) ).union(set( (ob for obs in obs_list for ob in obs) ) )
     
 def test():
     import doctest

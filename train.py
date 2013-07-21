@@ -55,7 +55,7 @@ def init_estimate(Q, annotation_list, discount = False, V = None, vfreq = None):
         rc,cc =  B_unnormalized.shape
         B = B_unnormalized / B_unnormalized.sum(1).reshape(rc,1).repeat(cc,1)
     else: #using discounting
-        B = discounted(B_unnormalized, V, V_freq)
+        B = discounted(B_unnormalized, V, vfreq)
 
     #calculating pi
     #starting state list
