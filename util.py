@@ -89,6 +89,26 @@ class hashdict(dict):
         dict.update(result, right)
         return result
 
-if __name__ == '__main__':
+def read_annotation(f):
+    """
+    (file like object) -> list of ((text, tag), (text, tag), (text, tag), ....)
+    """
+    
+    from simplejson import loads
+    
+    return [((a["text"], a["tags"][0][0].upper() if len(a["tags"]) == 1 and a["tags"][0] in ("begin", "continue") else "O") for a in sent)
+            for sent in loads(f.read())]
+    
+def test():
     import doctest
     doctest.testmod()
+    
+def main():
+    ans = read_annotation(open("data/annotated.json", "r"))
+    for sent in ans:
+        for a in sent:
+            print a[0],"/",a[1],",",
+        print
+        
+if __name__ == '__main__':
+    main()
