@@ -3,16 +3,16 @@ from collections import Counter
 
 from lmatrix import LMatrix
 
-def init_estimate(obs_list):
+from util import hashdict
+
+def init_estimate(Q, obs_list):
     """
-    (observation list) -> A, B, pi
+    (state set, observation list) -> A, B, pi
 
     given a list of observation, initial estimate of the parameter
     """
     #get the state set and the output vocabulary
-    Q = set( (a[1] for obs in obs_list for a in obs) )
     V = set( (a[0] for obs in obs_list for a in obs) )
-    
     
     #calculating the state transition matrix
     #get the bigrams, (from-state,to-state) list
@@ -34,11 +34,10 @@ def init_estimate(obs_list):
     
     #calculating the emission prob matrix
     #emission tuples, (state, observation ) list
-    emission_tuple_list = [(ob.word, ob.tag) for obs in obs_list for ob in obs]
-
+    emission_tuple_list = [(ob.tag, ob.word) for obs in obs_list for ob in obs]
+    
     #the same above
     emission_freq = Counter(emission_tuple_list)
-    print emission_freq
     
     B_unnormalized = LMatrix(Q, V)
     
@@ -50,7 +49,6 @@ def init_estimate(obs_list):
     rc,cc =  B_unnormalized.shape
     B = B_unnormalized / B_unnormalized.sum(1).reshape(rc,1).repeat(cc,1)
 
-
     #calculating pi
     #starting state list
     start_states = [obs[0][1] for obs in obs_list]
@@ -61,5 +59,18 @@ def init_estimate(obs_list):
     pi = dict()
     for s in Q:
         pi[s] = start_state_freq[s] / sum(start_state_freq.values())
+        
+    pi = hashdict(pi)
     
     return A, B, pi
+
+
+if __name__ == '__main__':
+    from util import read_annotation
+    
+    obs_list = read_annotation(open("data/annotated.json", "r"))
+    A, B, pi = init_estimate(("O", "B", "C"), obs_list)
+
+    from baum_welch import baum_welch
+    
+    A, B, pi = baum_welch(obs_list, A, B, pi)
