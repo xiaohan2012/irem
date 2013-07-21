@@ -89,6 +89,10 @@ class hashdict(dict):
         dict.update(result, right)
         return result
 
+from collections import namedtuple
+
+AnnotatedWord = namedtuple("AnnotatedWord", "word tag")
+
 def read_annotation(f):
     """
     (file like object) -> list of ((text, tag), (text, tag), (text, tag), ....)
@@ -96,7 +100,8 @@ def read_annotation(f):
     
     from simplejson import loads
     
-    return [((a["text"], a["tags"][0][0].upper() if len(a["tags"]) == 1 and a["tags"][0] in ("begin", "continue") else "O") for a in sent)
+    return [[(AnnotatedWord(a["text"], a["tags"][0][0].upper() if len(a["tags"]) == 1 and a["tags"][0] in ("begin", "continue") else "O"))
+             for a in sent]
             for sent in loads(f.read())]
     
 def test():
@@ -107,7 +112,7 @@ def main():
     ans = read_annotation(open("data/annotated.json", "r"))
     for sent in ans:
         for a in sent:
-            print a[0],"/",a[1],",",
+            print a.word,"/",a.tag,",",
         print
         
 if __name__ == '__main__':
