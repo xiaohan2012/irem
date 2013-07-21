@@ -113,7 +113,9 @@ def baum_welch(lst_of_obs, A, B, pi):
         new_A,new_B,new_pi = one_iter(lst_of_obs, A, B, pi)
 
         new_score = sum( (np.log(forward_prob_table(obs, new_A, new_B, new_pi)[1]) for obs in lst_of_obs) )
+        
         print "new score", new_score
+        
         if convergent(old_score, new_score):
             return new_A, new_B, new_pi
 
