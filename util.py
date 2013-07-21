@@ -90,7 +90,7 @@ class hashdict(dict):
         return result
 
 from collections import namedtuple
-from simplejson import load
+from simplejson import load, loads
 
 AnnotatedWord = namedtuple("AnnotatedWord", "word tag")
 
@@ -104,9 +104,13 @@ def read_annotation(f):
             for sent in loads(f.read())]
     
 def sample_observations_from_file(f, n=2000):
-    """sample `n` observations from recipe file"""
+    """sample `n` observations from recipe file, `f`"""
     import random
     return map(lambda r: tuple(r), random.sample(load(f), n))
+
+def get_V(annotation_list, obs_list = []):
+    """given the annotation list and the observation list, return the output vocabulary"""
+    return tuple( set( (pair.word for sent in annotation_list for pair in sent) ).union(set( (ob for obs in obs_list for ob in obs) ) ) )
     
 def test():
     import doctest
