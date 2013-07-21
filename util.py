@@ -100,8 +100,8 @@ def read_annotation(f):
     
     from simplejson import loads
     
-    return [[(AnnotatedWord(a["text"], a["tags"][0][0].upper() if len(a["tags"]) == 1 and a["tags"][0] in ("begin", "continue") else "O"))
-             for a in sent]
+    return [tuple([(AnnotatedWord(a["text"], a["tags"][0][0].upper() if len(a["tags"]) == 1 and a["tags"][0] in ("begin", "continue") else "O"))
+             for a in sent])
             for sent in loads(f.read())]
     
 def test():
