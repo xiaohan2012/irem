@@ -15,7 +15,7 @@ class DiscountTest(unittest.TestCase):
         self.V = set( ("often", "frequent", "infrequent", "unusual", "qweqwe", "sdvqwe"))
         self.freq = Counter(["often"] * 50 + ["frequent"] * 25 + ["infrequent"] * 3 + ["unusual"] * 4 + ["qweqwe", "sdvqwe", "sdvqwe"])
 
-    def test_runnable(self):
+    def test_if_expected(self):
         actual = discounted(self.B, self.V, self.freq)
         expected = LMatrix( ("s1", "s2"),
                  ("often", "frequent", "infrequent", "unusual", "qweqwe", "sdvqwe"),
@@ -28,7 +28,14 @@ class DiscountTest(unittest.TestCase):
         for s in actual.rlabels:
             for o in actual.clabels:
                 self.assertAlmostEqual(actual[s,o], expected[s,o])
+                
+    def test_sum_to_one(self):
+        """if prob sums to one"""
+        actual = discounted(self.B, self.V, self.freq)
 
+        for i in actual.sum(1):
+            self.assertAlmostEqual(i, 1)
+                
 
 if __name__ == '__main__':
     unittest.main()
