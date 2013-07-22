@@ -111,6 +111,15 @@ def sample_observations_from_file(f, n=2000):
 def get_V(annotation_list, obs_list = []):
     """given the annotation list and the observation list, return the output vocabulary"""
     return  set( (pair.word for sent in annotation_list for pair in sent) ).union(set( (ob for obs in obs_list for ob in obs) ) )
+
+def load_HMM(iter_id = "28"):
+    from cPickle import load
+    
+    A = load(open("param_snapshot/%s_A.mat" % iter_id, "r"))
+    B = load(open("param_snapshot/%s_B.mat" % iter_id, "r"))
+    pi = load(open("param_snapshot/%s_pi.mat" % iter_id, "r"))
+
+    return A, B, pi
     
 def test():
     import doctest
