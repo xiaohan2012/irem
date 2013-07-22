@@ -15,18 +15,24 @@ def viterbi(obs, A, B, pi):
     #The probability of **the most probable path** ending in state s with observation obs[i]
     trellis = LMatrix(Q, xrange(T))
     
-    backtrace = [dict()] * T
+    backtrace = [dict() for i in xrange(T-1)]
     
     for i in xrange(T):
         ob = obs[i]
         for s in Q:
             if i == 0:
-                print s, i, np.log2(B[s,ob]), np.log2(pi[s])
                 trellis[s,i] = np.log2(B[s,ob]) + np.log2(pi[s])
             else:
                 probs = trellis[:,i-1]  + np.log2(A[:,s])
                 trellis[s,i] = np.log2(B[s,ob]) + np.max(probs)
+                
+                backtrace[i-1][s] = Q[np.argmax(probs)]
+                
+    most_likely_end_state = Q[np.argmax(trellis[:,-1])]
+    
+    states = [most_likely_end_state]
 
-                backtrace[i][s] = Q[np.argmax(probs)]
-
-    print ("", ), trellis, backtrace
+    for cell in backtrace[::-1]:
+        states.append(cell[states[-1]])
+    
+    return tuple(states[::-1]), trellis, backtrace
