@@ -88,6 +88,18 @@ def one_iter(lst_of_obs, A, B, pi):
                 
     return A_normalized, B_normalized, pi_normalized
 
+def clear_memoization():
+    gamma.cache = {}
+    delta.cache = {}
+    forward_prob_table.cache  = {}
+    backward_prob_table.cache = {}
+
+def take_snapshot(iteration, A, B, pi):
+    #save a snap shot of the parameters
+    from cPickle import dump
+    dump(A,open("param_snapshot/%d_A.mat" %iteration, "w"))
+    dump(B,open("param_snapshot/%d_B.mat" %iteration, "w"))
+    dump(pi,open("param_snapshot/%d_pi.mat" %iteration, "w"))
     
 def baum_welch(lst_of_obs, A, B, pi):
     """
@@ -106,17 +118,25 @@ def baum_welch(lst_of_obs, A, B, pi):
     the baum-welch algorithm
     """
     scores = []
-    i = 0
+    iteration = 0
+    
     while True:
+        take_snapshot(iteration, A, B, pi)
+        
         old_score = sum( (np.log(forward_prob_table(obs, A, B, pi)[1]) for obs in lst_of_obs) )
         
         new_A,new_B,new_pi = one_iter(lst_of_obs, A, B, pi)
 
         new_score = sum( (np.log(forward_prob_table(obs, new_A, new_B, new_pi)[1]) for obs in lst_of_obs) )
         
-        print "new score", new_score
+        print "iteration %d, score %f" %(iteration, new_score)
         
         if convergent(old_score, new_score):
             return new_A, new_B, new_pi
 
         A, B, pi = new_A, new_B, new_pi
+
+        #to prevent memory usage explode
+        clear_memoization()
+
+        iteration += 1        

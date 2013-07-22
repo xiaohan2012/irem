@@ -128,9 +128,13 @@ if __name__ == '__main__':
     #get Q and V
     Q = ("O", "B", "C")
     V = get_V(annotation_list, obs_list)
-    
-    A, B, pi = init_estimate(Q, annotation_list)
+
+    print "init estimating..."
+    A, B, pi = init_estimate(Q, annotation_list, discount = True, V = V, vfreq = freq)
     
     from baum_welch import baum_welch
-    
+
+    print "learning..."
     A, B, pi = baum_welch(obs_list, A, B, pi)
+
+    
