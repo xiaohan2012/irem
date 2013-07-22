@@ -121,7 +121,7 @@ if __name__ == '__main__':
     annotation_list = read_annotation(open("data/annotated.json", "r"))
 
     #get the observation list
-    obs_list = sample_observations_from_file(open("data/ingredients5000.json", "r"), 2500)
+    obs_list = sample_observations_from_file(open("data/ingredients5000.json", "r"), 10)
 
     freq = word_freq(annotation_list, obs_list)
     

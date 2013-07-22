@@ -114,12 +114,16 @@ def get_V(annotation_list, obs_list = []):
 
 def load_HMM(iter_id = "28"):
     from cPickle import load
-    
+    from lmatrix import LMatrix
+
     A = load(open("param_snapshot/%s_A.mat" % iter_id, "r"))
     B = load(open("param_snapshot/%s_B.mat" % iter_id, "r"))
     pi = load(open("param_snapshot/%s_pi.mat" % iter_id, "r"))
 
-    return A, B, pi
+    Q = load(open("param_snapshot/Q.vec", "r"))
+    V = load(open("param_snapshot/V.vec", "r"))
+    
+    return LMatrix(Q, data = A), LMatrix(Q,V, data = B), pi
     
 def test():
     import doctest
@@ -132,5 +136,7 @@ def main():
             print a.word,"/",a.tag,",",
         print
         
+    A,B,pi = load_HMM("1")
+    
 if __name__ == '__main__':
     main()

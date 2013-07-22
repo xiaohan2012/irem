@@ -128,6 +128,13 @@ class IterationOneTest(unittest.TestCase):
         for actual, expected in zip(B.flatten(), [0.357, 0.643, 0.4292, 0.5708]):
             self.assertAlmostEqual(actual, expected, places = 2)
             
+    def test_labels(self):
+        """if labels in A, B persists"""
+        A, B, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        self.assertEqual(A.rlabels, self.A.rlabels)
+        self.assertEqual(B.rlabels, self.B.rlabels)
+        self.assertEqual(A.clabels, self.A.clabels)
+        self.assertEqual(B.clabels, self.B.clabels)
 
 class IterationTwoTest(unittest.TestCase):
     """
@@ -167,6 +174,14 @@ class IterationTwoTest(unittest.TestCase):
         _, B, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
         for actual, expected in zip(B.flatten(), [0.3624, 0.6376, 0.4252, 0.5748]):
             self.assertAlmostEqual(actual, expected, places = 2)
+
+    def test_labels(self):
+        """if labels in A, B persists"""
+        A, B, _ = one_iter(self.lst_of_obs, self.A, self.B, self.pi)
+        self.assertEqual(A.rlabels, self.A.rlabels)
+        self.assertEqual(B.rlabels, self.B.rlabels)
+        self.assertEqual(A.clabels, self.A.clabels)
+        self.assertEqual(B.clabels, self.B.clabels)
             
 if __name__ == '__main__':
     unittest.main()

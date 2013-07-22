@@ -96,10 +96,16 @@ def clear_memoization():
 
 def take_snapshot(iteration, A, B, pi):
     #save a snap shot of the parameters
-    from cPickle import dump
+
+    from cPickle import dump, load
+    dump(A.rlabels, open("param_snapshot/Q.vec", "w"))
+    dump(B.clabels, open("param_snapshot/V.vec", "w"))
+
     dump(A,open("param_snapshot/%d_A.mat" %iteration, "w"))
     dump(B,open("param_snapshot/%d_B.mat" %iteration, "w"))
     dump(pi,open("param_snapshot/%d_pi.mat" %iteration, "w"))
+
+    
     
 def baum_welch(lst_of_obs, A, B, pi):
     """

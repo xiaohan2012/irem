@@ -36,3 +36,8 @@ def viterbi(obs, A, B, pi):
         states.append(cell[states[-1]])
     
     return tuple(states[::-1]), trellis, backtrace
+
+
+if __name__ == '__main__':
+    from util import load_HMM
+    A, B, pi = load_HMM()
