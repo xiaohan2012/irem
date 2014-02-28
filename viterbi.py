@@ -6,7 +6,13 @@ def viterbi(obs, A, B, pi):
     """
     given the observations and the HMM setup
     
-    return the most likely state sequence, the prob trellis, the backtrace pointers
+    obs: observations
+    A: state transition matrix
+    B: emission probability
+    pi: initial state distribution
+    
+    Return:
+    the most likely state sequence, the prob trellis, the backtrace pointers
     """
     Q = A.rlabels
     T = len(obs)
